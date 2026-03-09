@@ -4,275 +4,799 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SWC Ultimate Prospecting & Logistics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        #auth-container, #app-container, #logistics-container { width: 100%; max-width: 600px; background: #2d2d2d; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); box-sizing: border-box; margin-bottom: 20px; }
+        :root {
+            --bg-deep: #080c10;
+            --bg-panel: #0d1520;
+            --bg-card: #111e2e;
+            --accent: #00d4ff;
+            --accent2: #ff6b35;
+            --green: #00ff9d;
+            --yellow: #ffd700;
+            --red: #ff3355;
+            --text: #c8dff0;
+            --text-dim: #5a7a99;
+            --border: rgba(0, 212, 255, 0.15);
+            --border-bright: rgba(0, 212, 255, 0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(0, 80, 120, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 40, 80, 0.2) 0%, transparent 50%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: repeating-linear-gradient(
+                0deg, transparent, transparent 39px,
+                rgba(0, 212, 255, 0.03) 39px, rgba(0, 212, 255, 0.03) 40px
+            ), repeating-linear-gradient(
+                90deg, transparent, transparent 39px,
+                rgba(0, 212, 255, 0.03) 39px, rgba(0, 212, 255, 0.03) 40px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .hidden { display: none !important; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #444; border-radius: 6px; background: #1a1a1a; color: #fff; font-size: 16px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #b02a37; color: white; }
-        .btn-nav { background: #444; color: #fff; margin-bottom: 15px; }
-        canvas { width: 100%; height: auto; border: 2px solid #444; margin-top: 10px; background: #000; cursor: crosshair; }
-        #info, #build-strategy { margin-top: 15px; padding: 10px; background: #1a1a1a; border-radius: 6px; border-left: 4px solid #007bff; }
-        .log-box { background: #3d3d3d; border: 1px dashed #666; padding: 10px; margin-bottom: 15px; border-radius: 6px; }
-        #user-bar { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 15px; }
-        ul { padding: 0; list-style: none; }
+
+        .panel {
+            width: 100%;
+            max-width: 640px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 24px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        h2::before { content: '// '; color: var(--text-dim); }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            margin: 6px 0;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            background: var(--bg-deep);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.2);
+        }
+
+        select option { background: var(--bg-panel); }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            margin-top: 8px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .btn-primary:hover { background: rgba(0, 212, 255, 0.1); box-shadow: 0 0 15px rgba(0, 212, 255, 0.2); }
+
+        .btn-success {
+            background: transparent;
+            border-color: var(--green);
+            color: var(--green);
+        }
+        .btn-success:hover { background: rgba(0, 255, 157, 0.1); }
+
+        .btn-danger {
+            background: transparent;
+            border-color: var(--red);
+            color: var(--red);
+        }
+        .btn-danger:hover { background: rgba(255, 51, 85, 0.1); }
+
+        .btn-nav {
+            background: var(--bg-card);
+            border-color: var(--border);
+            color: var(--text-dim);
+            margin-bottom: 0;
+        }
+        .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-nav.active { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
+
+        #nav-bar {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            max-width: 640px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        #nav-bar button { margin-top: 0; }
+
+        /* CANVAS */
+        canvas {
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            margin-top: 12px;
+            background: #020810;
+            cursor: crosshair;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        /* INFO BOX */
+        #info {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            border-left: 3px solid var(--accent);
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        /* LOG BOX */
+        .log-box {
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            padding: 14px;
+            margin-bottom: 14px;
+            border-radius: 3px;
+        }
+
+        .log-box label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        /* MODE BUTTONS */
+        .mode-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        .mode-row button { margin-top: 0; }
+
+        /* USER BAR */
+        #user-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        #user-bar span { color: var(--accent); }
+        #logout-btn { color: var(--red); text-decoration: none; font-size: 11px; }
+        #logout-btn:hover { text-decoration: underline; }
+
+        /* STATION LIST */
+        #station-list { padding: 0; list-style: none; margin: 10px 0; }
+        #station-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            margin-bottom: 6px;
+            background: var(--bg-deep);
+            font-size: 12px;
+        }
+
+        #station-list li .remove-btn {
+            width: auto;
+            padding: 3px 10px;
+            margin: 0;
+            font-size: 10px;
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        /* BUILD STRATEGY */
+        #build-strategy {
+            margin-top: 14px;
+            padding: 14px;
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green);
+            border-radius: 3px;
+            font-size: 12px;
+            line-height: 1.9;
+        }
+
+        /* STATS ROW */
+        .stats-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: var(--bg-deep);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-box .val {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            color: var(--accent);
+            display: block;
+        }
+
+        .stat-box .lbl {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* SCAN HISTORY */
+        #scan-history {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 10px;
+        }
+
+        #scan-history div {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* TITLE */
+        .app-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 4px;
+            color: var(--text-dim);
+            text-align: center;
+            width: 100%;
+            max-width: 640px;
+            margin: 12px 0 8px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-title span { color: var(--accent); }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+        /* ANIMATION */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .scanning { animation: pulse 1.5s ease-in-out infinite; }
     </style>
 </head>
 <body>
 
-<div id="auth-container">
-    <h2>SWC Solver Login</h2>
-    <input type="email" id="email" placeholder="E-Mail">
+<div class="app-title">SWC <span>SOLVER</span> v2.0</div>
+
+<!-- AUTH -->
+<div id="auth-container" class="panel">
+    <h2>System Access</h2>
+    <input type="email" id="email" placeholder="E-Mail Adresse">
     <input type="password" id="password" placeholder="Passwort">
-    <button class="btn-primary" id="login-btn">Login</button>
+    <button class="btn-primary" id="login-btn">▶ Einloggen</button>
+    <div id="auth-error" style="color:var(--red);font-size:11px;margin-top:8px;display:none;"></div>
 </div>
 
-<!-- Navigation -->
-<div id="nav-bar" class="hidden" style="width: 100%; max-width: 600px;">
-    <button class="btn-nav" onclick="showView('scan')">🛰️ Prospecting (Suche)</button>
-    <button class="btn-nav" onclick="showView('logistics')">🏗️ Logistik (Stationen)</button>
+<!-- NAVIGATION -->
+<div id="nav-bar" class="hidden">
+    <button class="btn-nav active" id="nav-scan" onclick="showView('scan')">🛰️ Prospecting</button>
+    <button class="btn-nav" id="nav-logistics" onclick="showView('logistics')">🏗️ Logistik</button>
 </div>
 
 <!-- VIEW: PROSPECTING -->
-<div id="app-container" class="hidden">
-    <div id="user-bar"><span id="display-user"></span> <a href="#" id="logout-btn" style="color: #ff4d4d; text-decoration: none;">Abmelden</a></div>
+<div id="app-container" class="panel hidden">
+    <div id="user-bar">
+        <span id="display-user"></span>
+        <a href="#" id="logout-btn">Abmelden</a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-box">
+            <span class="val" id="stat-possible">–</span>
+            <span class="lbl">Mögliche Felder</span>
+        </div>
+        <div class="stat-box">
+            <span class="val" id="stat-scans">0</span>
+            <span class="lbl">Aktive Scans</span>
+        </div>
+        <div class="stat-box">
+            <span class="val" id="stat-depots">0</span>
+            <span class="lbl">Depots</span>
+        </div>
+    </div>
+
     <div class="log-box">
-        <textarea id="swc-bulk-log" rows="3" placeholder="SWC Log-Liste hier einfügen..."></textarea>
-        <button class="btn-primary" onclick="parseBulkLog()">Importieren</button>
+        <label>SWC Log-Import (mehrere Zeilen möglich)</label>
+        <textarea id="swc-bulk-log" rows="4" placeholder="Scan-Log hier einfügen, z.B.:&#10;Asteroid field at 5, 12 distance of 3&#10;Depot located at 10, 8"></textarea>
+        <button class="btn-primary" onclick="parseBulkLog()">▶ Importieren & Analysieren</button>
     </div>
-    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-        <button id="mode-scan" class="btn-primary" onclick="setMode('scan')">Modus: Scan</button>
-        <button id="mode-depot" class="btn-success" style="opacity:0.5" onclick="setMode('depot')">Modus: Depot</button>
+
+    <div class="mode-row">
+        <button id="mode-scan" class="btn-primary" onclick="setMode('scan')">✦ Scan-Modus</button>
+        <button id="mode-depot" class="btn-success" onclick="setMode('depot')">◉ Depot-Modus</button>
     </div>
+
     <canvas id="grid" width="600" height="600"></canvas>
-    <div id="info">Lade Daten...</div>
-    <button class="btn-danger" onclick="resetCloud()">Alles zurücksetzen</button>
+
+    <div id="info">
+        <span class="scanning">◈</span> Warte auf Scan-Daten...
+    </div>
+
+    <div id="scan-history"></div>
+
+    <button class="btn-danger" style="margin-top:16px" onclick="resetCloud()">⚠ Alle Daten zurücksetzen</button>
 </div>
 
 <!-- VIEW: LOGISTICS -->
-<div id="logistics-container" class="hidden">
-    <h3>Stations-Bau-Planer</h3>
-    <input type="number" id="ship-cap" placeholder="Schiffskapazität m³" value="100000">
+<div id="logistics-container" class="panel hidden">
+    <h2>Stations-Bau-Planer</h2>
+
     <div class="log-box">
-        <label>Station hinzufügen:</label>
-        <select id="station-template">
-            <option value="Trading Hub|700000">Trading Hub (700k m³)</option>
-            <option value="Refinery|400000">Refinery (400k m³)</option>
-            <option value="Storage Depot|150000">Storage Depot (150k m³)</option>
-        </select>
-        <button class="btn-success" onclick="addStationToQueue()">Hinzufügen</button>
+        <label>Schiffskapazität (m³)</label>
+        <input type="number" id="ship-cap" placeholder="z.B. 100000" value="100000">
     </div>
+
+    <div class="log-box">
+        <label>Station hinzufügen</label>
+        <select id="station-template">
+            <option value="Trading Hub|700000">Trading Hub (700.000 m³)</option>
+            <option value="Refinery|400000">Refinery (400.000 m³)</option>
+            <option value="Storage Depot|150000">Storage Depot (150.000 m³)</option>
+            <option value="Manufacturing Plant|550000">Manufacturing Plant (550.000 m³)</option>
+            <option value="Shipyard|900000">Shipyard (900.000 m³)</option>
+        </select>
+        <input type="text" id="custom-station-name" placeholder="Oder eigener Name...">
+        <input type="number" id="custom-station-vol" placeholder="Eigenes Volumen m³">
+        <button class="btn-success" onclick="addStationToQueue()">+ Zur Warteschlange hinzufügen</button>
+    </div>
+
     <ul id="station-list"></ul>
-    <button class="btn-primary" onclick="optimizeBuildOrder()">Beste Reihenfolge berechnen</button>
+
+    <button class="btn-primary" onclick="optimizeBuildOrder()">⚙ Optimale Baureihenfolge berechnen</button>
+
     <div id="build-strategy">Noch keine Projekte geplant.</div>
 </div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { initializeApp } from 
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import { getAuth, signInWithEmailAndPassword, 
-         onAuthStateChanged, signOut } 
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import { getFirestore, doc, setDoc, 
-         onSnapshot, deleteDoc } 
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-</script>
-
-    // --- DEINE KONFIGURATION HIER ---
-    const firebaseConfig = {
+// ── FIREBASE CONFIG ──────────────────────────────────────────────
+const firebaseConfig = {
     apiKey: "AIzaSyA5oJaZTyFkTteRaQOOzcZxsNmmP5mtWYw",
     authDomain: "swc-astroid-prospecting.firebaseapp.com",
     projectId: "swc-astroid-prospecting",
     storageBucket: "swc-astroid-prospecting.firebasestorage.app",
     messagingSenderId: "427282103404",
-    appId: "1:427282103404:web:cd44a84bd35c635a0fec49",
-    measurementId: "G-CHKSWXZ2V9"
-    };
+    appId: "1:427282103404:web:cd44a84bd35c635a0fec49"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    let measurements = [];
-    let depots = [];
-    let buildQueue = [];
-    let mode = 'scan';
-    const gridSize = 20;
-    const canvas = document.getElementById('grid');
-    const ctx = canvas.getContext('2d');
+// ── STATE ────────────────────────────────────────────────────────
+let measurements = [];
+let depots = [];
+let buildQueue = [];
+let mode = 'scan';
+const GRID = 20;
+const CELL = 30;
+const canvas = document.getElementById('grid');
+const ctx = canvas.getContext('2d');
 
-    // UI NAVIGATION
-    window.showView = (view) => {
-        document.getElementById('app-container').classList.toggle('hidden', view !== 'scan');
-        document.getElementById('logistics-container').classList.toggle('hidden', view !== 'logistics');
-    };
+// ── NAVIGATION ───────────────────────────────────────────────────
+window.showView = (view) => {
+    document.getElementById('app-container').classList.toggle('hidden', view !== 'scan');
+    document.getElementById('logistics-container').classList.toggle('hidden', view !== 'logistics');
+    document.getElementById('nav-scan').classList.toggle('active', view === 'scan');
+    document.getElementById('nav-logistics').classList.toggle('active', view === 'logistics');
+};
 
-    // AUTH
-    document.getElementById('login-btn').addEventListener('click', () => {
-        signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
-    });
-    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-    onAuthStateChanged(auth, (user) => {
-        const isAuth = !!user;
-        document.getElementById('auth-container').classList.toggle('hidden', isAuth);
-        document.getElementById('nav-bar').classList.toggle('hidden', !isAuth);
-        document.getElementById('app-container').classList.toggle('hidden', !isAuth);
-        if(isAuth) {
-            document.getElementById('display-user').innerText = user.email;
-            listenToCloud(user.uid);
-        }
-    });
+// ── AUTH ─────────────────────────────────────────────────────────
+document.getElementById('login-btn').addEventListener('click', async () => {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const errEl = document.getElementById('auth-error');
+    errEl.style.display = 'none';
+    try {
+        await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+        errEl.textContent = '⚠ ' + (e.code === 'auth/invalid-credential' ? 'Falsche E-Mail oder Passwort.' : e.message);
+        errEl.style.display = 'block';
+    }
+});
 
-    // PROSPECTING LOGIC
-    window.setMode = (m) => {
-        mode = m;
-        document.getElementById('mode-scan').style.opacity = m === 'scan' ? '1' : '0.5';
-        document.getElementById('mode-depot').style.opacity = m === 'depot' ? '1' : '0.5';
-    };
+document.getElementById('logout-btn').addEventListener('click', (e) => {
+    e.preventDefault();
+    signOut(auth);
+});
 
-    canvas.addEventListener('click', async (e) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = Math.floor((e.clientX - rect.left) / (rect.width / gridSize));
-        const y = Math.floor((e.clientY - rect.top) / (rect.height / gridSize));
-        
-        if(mode === 'depot') {
-            const exists = depots.findIndex(d => d.x === x && d.y === y);
-            if(exists > -1) depots.splice(exists, 1);
-            else {
-                const newDepot = {x, y};
-                depots.push(newDepot);
-                // Auto-Cleanup: Lösche Scans, die zu diesem Depot passen
-                measurements = measurements.filter(m => (Math.abs(m.x - x) + Math.abs(m.y - y)) !== m.d);
-            }
-            await sync();
+onAuthStateChanged(auth, (user) => {
+    const isAuth = !!user;
+    document.getElementById('auth-container').classList.toggle('hidden', isAuth);
+    document.getElementById('nav-bar').classList.toggle('hidden', !isAuth);
+    document.getElementById('app-container').classList.toggle('hidden', !isAuth);
+    if (isAuth) {
+        document.getElementById('display-user').innerText = user.email;
+        listenToCloud(user.uid);
+    }
+});
+
+// ── PROSPECTING ──────────────────────────────────────────────────
+window.setMode = (m) => {
+    mode = m;
+    document.getElementById('mode-scan').style.opacity  = m === 'scan'  ? '1' : '0.5';
+    document.getElementById('mode-depot').style.opacity = m === 'depot' ? '1' : '0.5';
+};
+
+canvas.addEventListener('click', async (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = Math.floor((e.clientX - rect.left) * scaleX / CELL);
+    const y = Math.floor((e.clientY - rect.top)  * scaleY / CELL);
+    if (x < 0 || x >= GRID || y < 0 || y >= GRID) return;
+
+    if (mode === 'depot') {
+        const idx = depots.findIndex(d => d.x === x && d.y === y);
+        if (idx > -1) {
+            depots.splice(idx, 1);
         } else {
-            // Für manuellen Modus: Alert oder Inputs füllen
-            const d = prompt(`Distanz für Scan bei ${x},${y}:`);
-            if(d !== null) {
-                measurements.push({x, y, d: parseInt(d)});
-                await sync();
+            depots.push({ x, y });
+            // Auto-cleanup: entferne Scans, deren Distanz-Ring durch dieses Depot abgedeckt ist
+            measurements = measurements.filter(m => (Math.abs(m.x - x) + Math.abs(m.y - y)) !== m.d);
+        }
+    } else {
+        const d = prompt(`Distanz-Wert für Scan-Position (${x}, ${y}):`);
+        if (d === null || d.trim() === '') return;
+        const dist = parseInt(d);
+        if (isNaN(dist) || dist < 0) { alert('Ungültige Distanz.'); return; }
+        measurements.push({ x, y, d: dist });
+        appendScanHistory(x, y, dist);
+    }
+    await sync();
+});
+
+window.parseBulkLog = async () => {
+    const lines = document.getElementById('swc-bulk-log').value.split('\n');
+    let imported = 0;
+    lines.forEach(line => {
+        if (!line.trim()) return;
+        const coords = line.match(/(\d+)\s*[,\s]\s*(\d+)/);
+        const dist   = line.match(/(?:distance|of)\s*(\d+)/i);
+        if (coords && dist) {
+            measurements.push({ x: parseInt(coords[1]), y: parseInt(coords[2]), d: parseInt(dist[1]) });
+            imported++;
+        } else if (coords && /located|depot/i.test(line)) {
+            depots.push({ x: parseInt(coords[1]), y: parseInt(coords[2]) });
+            imported++;
+        }
+    });
+    if (imported === 0) {
+        alert('Keine gültigen Einträge gefunden.\nErwartet: "... at X, Y distance of D" oder "located at X, Y"');
+        return;
+    }
+    await sync();
+    document.getElementById('swc-bulk-log').value = '';
+    rebuildScanHistory();
+};
+
+function appendScanHistory(x, y, d) {
+    const el = document.getElementById('scan-history');
+    const entry = document.createElement('div');
+    entry.textContent = `+ Scan (${x},${y}) Distanz ${d}`;
+    el.prepend(entry);
+}
+
+function rebuildScanHistory() {
+    const el = document.getElementById('scan-history');
+    el.innerHTML = measurements.slice().reverse().map(m =>
+        `<div>+ Scan (${m.x},${m.y}) Distanz ${m.d}</div>`
+    ).join('');
+}
+
+// ── FIREBASE SYNC ────────────────────────────────────────────────
+async function sync() {
+    if (!auth.currentUser) return;
+    await setDoc(doc(db, "solves", auth.currentUser.uid), { measurements, depots, buildQueue });
+}
+
+function listenToCloud(uid) {
+    onSnapshot(doc(db, "solves", uid), (snap) => {
+        if (!snap.exists()) { render(); return; }
+        const data = snap.data();
+        measurements = data.measurements || [];
+        depots       = data.depots       || [];
+        buildQueue   = data.buildQueue   || [];
+        render();
+        updateQueueUI();
+        rebuildScanHistory();
+    });
+}
+
+// ── RENDER ───────────────────────────────────────────────────────
+function render() {
+    // Compute possible asteroid positions via Manhattan distance
+    const possible = [];
+    for (let x = 0; x < GRID; x++) {
+        for (let y = 0; y < GRID; y++) {
+            if (measurements.length > 0 &&
+                measurements.every(m => Math.abs(x - m.x) + Math.abs(y - m.y) === m.d)) {
+                possible.push({ x, y });
+            }
+        }
+    }
+
+    // ── Draw grid background
+    ctx.clearRect(0, 0, 600, 600);
+    ctx.strokeStyle = 'rgba(0, 212, 255, 0.08)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= GRID; i++) {
+        ctx.beginPath(); ctx.moveTo(i * CELL, 0);       ctx.lineTo(i * CELL, 600); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i * CELL);       ctx.lineTo(600, i * CELL); ctx.stroke();
+    }
+
+    // ── Draw Manhattan distance rings for each scan point
+    measurements.forEach(m => {
+        for (let x = 0; x < GRID; x++) {
+            for (let y = 0; y < GRID; y++) {
+                if (Math.abs(x - m.x) + Math.abs(y - m.y) === m.d) {
+                    ctx.fillStyle = 'rgba(255, 200, 0, 0.05)';
+                    ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2);
+                }
             }
         }
     });
 
-    window.parseBulkLog = async () => {
-        const lines = document.getElementById('swc-bulk-log').value.split('\n');
-        lines.forEach(line => {
-            const coords = line.match(/(\d+)\s*,\s*(\d+)/);
-            const dist = line.match(/(?:distance|of)\s*(\d+)/i);
-            if(coords && dist) measurements.push({x: parseInt(coords[1]), y: parseInt(coords[2]), d: parseInt(dist[1])});
-            else if(coords && line.includes('located')) depots.push({x: parseInt(coords[1]), y: parseInt(coords[2])});
-        });
-        await sync();
-        document.getElementById('swc-bulk-log').value = "";
-    };
+    // ── Possible positions
+    possible.forEach(c => {
+        ctx.fillStyle = 'rgba(0, 212, 255, 0.35)';
+        ctx.fillRect(c.x * CELL + 1, c.y * CELL + 1, CELL - 2, CELL - 2);
+        // Inner highlight
+        ctx.fillStyle = 'rgba(0, 212, 255, 0.15)';
+        ctx.fillRect(c.x * CELL + 4, c.y * CELL + 4, CELL - 8, CELL - 8);
+    });
 
-    async function sync() {
-        if(!auth.currentUser) return;
-        await setDoc(doc(db, "solves", auth.currentUser.uid), { measurements, depots, buildQueue });
+    // ── Depots
+    depots.forEach(d => {
+        ctx.fillStyle = '#00ff9d';
+        ctx.beginPath();
+        ctx.arc(d.x * CELL + CELL/2, d.y * CELL + CELL/2, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#080c10';
+        ctx.font = 'bold 9px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('D', d.x * CELL + CELL/2, d.y * CELL + CELL/2);
+    });
+
+    // ── Scan points
+    measurements.forEach(m => {
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(m.x * CELL + CELL/2, m.y * CELL + CELL/2, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255,215,0,0.3)';
+        ctx.fill();
+    });
+
+    // ── Recommended next scan (minimax strategy)
+    const rec = getRecommendation(possible);
+    if (rec) {
+        ctx.strokeStyle = '#ff6b35';
+        ctx.lineWidth = 2;
+        // Crosshair
+        const cx = rec.x * CELL + CELL/2, cy = rec.y * CELL + CELL/2;
+        ctx.beginPath(); ctx.moveTo(cx - 12, cy); ctx.lineTo(cx + 12, cy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx, cy - 12); ctx.lineTo(cx, cy + 12); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI * 2); ctx.stroke();
     }
 
-    function listenToCloud(uid) {
-        onSnapshot(doc(db, "solves", uid), (snap) => {
-            if(!snap.exists()) return;
-            const data = snap.data();
-            measurements = data.measurements || [];
-            depots = data.depots || [];
-            buildQueue = data.buildQueue || [];
-            render();
-            updateQueueUI();
-        });
+    // ── Coordinate labels (every 5 cells)
+    ctx.fillStyle = 'rgba(90,122,153,0.7)';
+    ctx.font = '8px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let i = 0; i < GRID; i += 5) {
+        ctx.fillText(i, i * CELL + CELL/2, 2);
+    }
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < GRID; i += 5) {
+        ctx.fillText(i, 2, i * CELL + CELL/2);
     }
 
-    function render() {
-        let possible = [];
-        for(let x=0; x<gridSize; x++) {
-            for(let y=0; y<gridSize; y++) {
-                if(measurements.every(m => (Math.abs(x-m.x) + Math.abs(y-m.y)) === m.d)) possible.push({x, y});
-            }
+    // ── Update stats
+    document.getElementById('stat-possible').textContent = measurements.length > 0 ? possible.length : '–';
+    document.getElementById('stat-scans').textContent    = measurements.length;
+    document.getElementById('stat-depots').textContent   = depots.length;
+
+    // ── Info text
+    let info = '';
+    if (measurements.length === 0) {
+        info = '◈ Warte auf Scan-Daten. Klick auf Gitterzelle oder Log importieren.';
+    } else if (possible.length === 0) {
+        info = '⚠ <span style="color:var(--red)">Keine konsistente Position gefunden — prüfe Scan-Daten.</span>';
+    } else if (possible.length === 1) {
+        info = `✓ <span style="color:var(--green)">Asteroid gefunden! Position: <b>${possible[0].x}, ${possible[0].y}</b></span>`;
+    } else {
+        info = `${possible.length} mögliche Positionen | `;
+        if (rec) {
+            info += `<span style="color:var(--accent2)">▶ Nächster Scan empfohlen bei: <b>${rec.x}, ${rec.y}</b></span>`;
+        } else {
+            info += 'Weitere Scans nötig.';
         }
-
-        ctx.clearRect(0,0,600,600);
-        ctx.strokeStyle = "#333";
-        for(let i=0; i<=gridSize; i++) {
-            ctx.beginPath(); ctx.moveTo(i*30,0); ctx.lineTo(i*30,600); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(0,i*30); ctx.lineTo(600,i*30); ctx.stroke();
-        }
-
-        ctx.fillStyle = "rgba(0, 123, 255, 0.3)";
-        possible.forEach(c => ctx.fillRect(c.x*30+1, c.y*30+1, 28, 28));
-        
-        depots.forEach(d => {
-            ctx.fillStyle = "#28a745"; ctx.beginPath();
-            ctx.arc(d.x*30+15, d.y*30+15, 10, 0, 7); ctx.fill();
-        });
-
-        measurements.forEach(m => {
-            ctx.fillStyle = "#ffc107"; ctx.beginPath();
-            ctx.arc(m.x*30+15, m.y*30+15, 5, 0, 7); ctx.fill();
-        });
-
-        // Visuelle Empfehlung (Fadenkreuz)
-        const rec = getRecommendation(possible);
-        if(rec) {
-            ctx.strokeStyle = "#00d4ff"; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.arc(rec.x*30+15, rec.y*30+15, 12, 0, 7); ctx.stroke();
-        }
-
-        document.getElementById('info').innerHTML = `Möglichkeiten: ${possible.length} | ${rec ? 'Empfehlung: '+rec.x+','+rec.y : 'Scan nötig'}`;
     }
+    document.getElementById('info').innerHTML = info;
+}
 
-    function getRecommendation(possible) {
-        if(possible.length <= 1 || possible.length > 100) return null;
-        let best = null, minMax = Infinity;
-        for(let x=0; x<gridSize; x++) {
-            for(let y=0; y<gridSize; y++) {
-                let counts = {};
-                possible.forEach(c => {
-                    let d = Math.abs(x-c.x) + Math.abs(y-c.y);
-                    counts[d] = (counts[d]||0)+1;
-                });
-                let worst = Math.max(...Object.values(counts));
-                if(worst < minMax) { minMax = worst; best = {x,y}; }
-            }
+// ── MINIMAX RECOMMENDATION ───────────────────────────────────────
+function getRecommendation(possible) {
+    if (possible.length <= 1 || possible.length > 120) return null;
+    let best = null, minMax = Infinity;
+    for (let x = 0; x < GRID; x++) {
+        for (let y = 0; y < GRID; y++) {
+            // Skip already-scanned positions
+            if (measurements.some(m => m.x === x && m.y === y)) continue;
+            const counts = {};
+            possible.forEach(c => {
+                const d = Math.abs(x - c.x) + Math.abs(y - c.y);
+                counts[d] = (counts[d] || 0) + 1;
+            });
+            const worst = Math.max(...Object.values(counts));
+            if (worst < minMax) { minMax = worst; best = { x, y }; }
         }
-        return best;
     }
+    return best;
+}
 
-    // LOGISTICS LOGIC
-    window.addStationToQueue = async () => {
+// ── LOGISTICS ────────────────────────────────────────────────────
+window.addStationToQueue = async () => {
+    const customName = document.getElementById('custom-station-name').value.trim();
+    const customVol  = parseInt(document.getElementById('custom-station-vol').value);
+
+    let name, volume;
+    if (customName && !isNaN(customVol) && customVol > 0) {
+        name   = customName;
+        volume = customVol;
+    } else {
         const val = document.getElementById('station-template').value.split('|');
-        buildQueue.push({ name: val[0], volume: parseInt(val[1]) });
-        await sync();
-    };
-
-    window.optimizeBuildOrder = () => {
-        const cap = parseInt(document.getElementById('ship-cap').value);
-        let sorted = [...buildQueue].sort((a,b) => a.volume - b.volume);
-        let html = "<b>Baureihenfolge (Effizient):</b><br>";
-        sorted.forEach((s, i) => {
-            html += `${i+1}. ${s.name} (${Math.ceil(s.volume/cap)} Flüge)<br>`;
-        });
-        document.getElementById('build-strategy').innerHTML = html;
-    };
-
-    function updateQueueUI() {
-        document.getElementById('station-list').innerHTML = buildQueue.map(s => `<li>🏗️ ${s.name}</li>`).join('');
+        name   = val[0];
+        volume = parseInt(val[1]);
     }
 
-    window.resetCloud = async () => { if(confirm("Reset?")) await deleteDoc(doc(db, "solves", auth.currentUser.uid)); };
+    buildQueue.push({ name, volume });
+    document.getElementById('custom-station-name').value = '';
+    document.getElementById('custom-station-vol').value  = '';
+    await sync();
+};
+
+window.removeStation = async (idx) => {
+    buildQueue.splice(idx, 1);
+    await sync();
+};
+
+window.optimizeBuildOrder = () => {
+    if (buildQueue.length === 0) {
+        document.getElementById('build-strategy').innerHTML = 'Keine Stationen in der Warteschlange.';
+        return;
+    }
+    const cap = parseInt(document.getElementById('ship-cap').value);
+    if (isNaN(cap) || cap <= 0) { alert('Ungültige Schiffskapazität.'); return; }
+
+    // Sort ascending by volume (kleinste zuerst → schneller Fortschritt sichtbar)
+    const sorted = [...buildQueue].sort((a, b) => a.volume - b.volume);
+    const totalFlights = sorted.reduce((sum, s) => sum + Math.ceil(s.volume / cap), 0);
+    const totalVol     = sorted.reduce((sum, s) => sum + s.volume, 0);
+
+    let html = `<b>🏗 Optimale Baureihenfolge</b><br>`;
+    html += `<span style="color:var(--text-dim)">Gesamt: ${sorted.length} Stationen | ${totalVol.toLocaleString('de')} m³ | ${totalFlights} Flüge</span><br><br>`;
+
+    sorted.forEach((s, i) => {
+        const flights = Math.ceil(s.volume / cap);
+        html += `<span style="color:var(--accent)">${i + 1}.</span> ${s.name} &nbsp;`;
+        html += `<span style="color:var(--text-dim)">${s.volume.toLocaleString('de')} m³ → ${flights} Flug${flights !== 1 ? 'e' : ''}</span><br>`;
+    });
+
+    document.getElementById('build-strategy').innerHTML = html;
+};
+
+function updateQueueUI() {
+    document.getElementById('station-list').innerHTML = buildQueue.map((s, i) => `
+        <li>
+            <span>🏗️ ${s.name} <span style="color:var(--text-dim)">(${s.volume.toLocaleString('de')} m³)</span></span>
+            <button class="btn-danger remove-btn" onclick="removeStation(${i})">✕</button>
+        </li>
+    `).join('');
+}
+
+// ── RESET ────────────────────────────────────────────────────────
+window.resetCloud = async () => {
+    if (confirm('Alle Scan- und Logistik-Daten löschen?')) {
+        await deleteDoc(doc(db, "solves", auth.currentUser.uid));
+        measurements = []; depots = []; buildQueue = [];
+        render(); updateQueueUI();
+        document.getElementById('scan-history').innerHTML = '';
+    }
+};
+
+// Initial render
+render();
 </script>
 </body>
 </html>
-
-
-
-
-
