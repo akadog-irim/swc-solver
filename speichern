@@ -1,0 +1,12 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA5oJaZTyFkTteRaQOOzcZxsNmmP5mtWYw",
+    authDomain: "swc-astroid-prospecting.firebaseapp.com",
+    projectId: "swc-astroid-prospecting",
+    storageBucket: "swc-astroid-prospecting.firebasestorage.app",
+    messagingSenderId: "427282103404",
+    appId: "1:427282103404:web:cd44a84bd35c635a0fec49",
+    measurementId: "G-CHKSWXZ2V9"
