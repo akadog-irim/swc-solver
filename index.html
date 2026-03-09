@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SWC Prospecting Cloud Solver PRO</title>
+    <title>SWC Ultimate Prospecting & Logistics</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #121212; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
-        #auth-container, #app-container { width: 100%; max-width: 600px; background: #1e1e1e; padding: 20px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a1a; color: #e0e0e0; display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0; }
+        #auth-container, #app-container, #logistics-container { width: 100%; max-width: 600px; background: #2d2d2d; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); box-sizing: border-box; margin-bottom: 20px; }
         .hidden { display: none !important; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #333; border-radius: 6px; background: #0a0a0a; color: #fff; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 14px; margin-top: 8px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.2s; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #444; border-radius: 6px; background: #1a1a1a; color: #fff; font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.2s; }
         .btn-primary { background: #007bff; color: white; }
-        .btn-depot { background: #28a745; color: white; }
-        .btn-danger { background: #b02a37; color: white; margin-top: 20px; }
-        canvas { width: 100%; height: auto; border: 2px solid #333; margin-top: 10px; background: #000; cursor: crosshair; }
-        #info { margin-top: 15px; padding: 12px; background: #252525; border-radius: 6px; border-left: 4px solid #007bff; line-height: 1.5; }
-        .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; background: #252525; padding: 10px; border-radius: 6px; font-size: 12px; border: 1px solid #444; width: 100%; box-sizing: border-box; }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-        .rect { width: 12px; height: 12px; display: inline-block; }
-        .active-mode { outline: 3px solid white; transform: scale(1.02); }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #b02a37; color: white; }
+        .btn-nav { background: #444; color: #fff; margin-bottom: 15px; }
+        canvas { width: 100%; height: auto; border: 2px solid #444; margin-top: 10px; background: #000; cursor: crosshair; }
+        #info, #build-strategy { margin-top: 15px; padding: 10px; background: #1a1a1a; border-radius: 6px; border-left: 4px solid #007bff; }
+        .log-box { background: #3d3d3d; border: 1px dashed #666; padding: 10px; margin-bottom: 15px; border-radius: 6px; }
+        #user-bar { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 15px; }
+        ul { padding: 0; list-style: none; }
     </style>
 </head>
 <body>
@@ -28,246 +27,238 @@
     <h2>SWC Solver Login</h2>
     <input type="email" id="email" placeholder="E-Mail">
     <input type="password" id="password" placeholder="Passwort">
-    <button class="btn-primary" id="login-btn">Einloggen</button>
+    <button class="btn-primary" id="login-btn">Login</button>
 </div>
 
+<!-- Navigation -->
+<div id="nav-bar" class="hidden" style="width: 100%; max-width: 600px;">
+    <button class="btn-nav" onclick="showView('scan')">🛰️ Prospecting (Suche)</button>
+    <button class="btn-nav" onclick="showView('logistics')">🏗️ Logistik (Stationen)</button>
+</div>
+
+<!-- VIEW: PROSPECTING -->
 <div id="app-container" class="hidden">
-    <div id="user-bar" style="display: flex; justify-content: space-between; font-size: 12px; color: #888; margin-bottom: 15px;">
-        <span id="display-user"></span>
-        <a href="#" id="logout-btn" style="color: #ff4d4d; text-decoration: none;">Abmelden</a>
+    <div id="user-bar"><span id="display-user"></span> <a href="#" id="logout-btn" style="color: #ff4d4d; text-decoration: none;">Abmelden</a></div>
+    <div class="log-box">
+        <textarea id="swc-bulk-log" rows="3" placeholder="SWC Log-Liste hier einfügen..."></textarea>
+        <button class="btn-primary" onclick="parseBulkLog()">Importieren</button>
     </div>
-
-    <div style="background: #252525; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444;">
-        <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">Asteroidenfeld:</label>
-        <div style="display: flex; gap: 8px;">
-            <select id="field-select"></select>
-            <button class="btn-primary" onclick="createNewField()" style="width: auto; margin:0; padding: 0 20px;">Neu</button>
-        </div>
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <button id="mode-scan" class="btn-primary" onclick="setMode('scan')">Modus: Scan</button>
+        <button id="mode-depot" class="btn-success" style="opacity:0.5" onclick="setMode('depot')">Modus: Depot</button>
     </div>
-
-    <textarea id="swc-bulk-log" rows="3" placeholder="SWC Log oder XML hier einfügen..."></textarea>
-    <button class="btn-primary" onclick="parseBulkLog()">Import starten</button>
-
-    <div class="mode-bar" style="display:flex; gap:10px; margin-top:10px;">
-        <button id="mode-scan" class="btn-primary active-mode" onclick="setMode('scan')">Modus: Scannen</button>
-        <button id="mode-depot" class="btn-depot" onclick="setMode('depot')">Modus: Depots</button>
-    </div>
-
     <canvas id="grid" width="600" height="600"></canvas>
+    <div id="info">Lade Daten...</div>
+    <button class="btn-danger" onclick="resetCloud()">Alles zurücksetzen</button>
+</div>
 
-    <div class="legend">
-        <div class="legend-item"><span class="rect" style="background: #222;"></span> Asteroid</div>
-        <div class="legend-item"><span class="rect" style="background: rgba(255, 0, 0, 0.4);"></span> Mögl. Ziel</div>
-        <div class="legend-item"><span class="dot" style="background: #ffc107;"></span> Scan</div>
-        <div class="legend-item"><span class="dot" style="background: #28a745; border: 1px solid white;"></span> Depot</div>
-        <div class="legend-item"><span class="dot" style="border: 2px solid #00d4ff; background: transparent;"></span> Empfehlung</div>
+<!-- VIEW: LOGISTICS -->
+<div id="logistics-container" class="hidden">
+    <h3>Stations-Bau-Planer</h3>
+    <input type="number" id="ship-cap" placeholder="Schiffskapazität m³" value="100000">
+    <div class="log-box">
+        <label>Station hinzufügen:</label>
+        <select id="station-template">
+            <option value="Trading Hub|700000">Trading Hub (700k m³)</option>
+            <option value="Refinery|400000">Refinery (400k m³)</option>
+            <option value="Storage Depot|150000">Storage Depot (150k m³)</option>
+        </select>
+        <button class="btn-success" onclick="addStationToQueue()">Hinzufügen</button>
     </div>
-    
-    <div style="display: flex; gap: 5px; margin-top: 10px;">
-        <input type="number" id="x" placeholder="X">
-        <input type="number" id="y" placeholder="Y">
-        <input type="number" id="d" placeholder="Dist">
-    </div>
-    <button class="btn-primary" onclick="manualAdd()">Einzeln Eintragen</button>
-    
-    <div id="info">Möglichkeiten: -</div>
-    <button class="btn-danger" onclick="resetCurrentField()">Feldinhalt löschen</button>
+    <ul id="station-list"></ul>
+    <button class="btn-primary" onclick="optimizeBuildOrder()">Beste Reihenfolge berechnen</button>
+    <div id="build-strategy">Noch keine Projekte geplant.</div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com";
+    import { getFirestore, doc, setDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyA5oJaZTyFkTteRaQOOzcZxsNmmP5mtWYw",
-    authDomain: "swc-astroid-prospecting.firebaseapp.com",
-    projectId: "swc-astroid-prospecting",
-    storageBucket: "swc-astroid-prospecting.firebasestorage.app",
-    messagingSenderId: "427282103404",
-    appId: "1:427282103404:web:cd44a84bd35c635a0fec49",
-    measurementId: "G-CHKSWXZ2V9"
-};
+    // --- DEINE KONFIGURATION HIER ---
+    const firebaseConfig = {
+        apiKey: "DEIN_API_KEY",
+        authDomain: "DEIN_PROJEKT.firebaseapp.com",
+        projectId: "DEIN_PROJEKT",
+        storageBucket: "DEIN_PROJEKT.appspot.com",
+        messagingSenderId: "DEINE_ID",
+        appId: "DEINE_APP_ID"
+    };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-let measurements = [], depots = [], possibleCells = [], mode = 'scan';
-let currentFieldId = "Standard-Feld", availableFields = ["Standard-Feld"];
-let gridLayout = Array(400).fill("a");
-let unsub = null;
-const gridSize = 20, canvas = document.getElementById('grid'), ctx = canvas.getContext('2d');
+    let measurements = [];
+    let depots = [];
+    let buildQueue = [];
+    let mode = 'scan';
+    const gridSize = 20;
+    const canvas = document.getElementById('grid');
+    const ctx = canvas.getContext('2d');
 
-document.getElementById('login-btn').addEventListener('click', () => {
-    const e = document.getElementById('email').value, p = document.getElementById('password').value;
-    signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
-});
-document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+    // UI NAVIGATION
+    window.showView = (view) => {
+        document.getElementById('app-container').classList.toggle('hidden', view !== 'scan');
+        document.getElementById('logistics-container').classList.toggle('hidden', view !== 'logistics');
+    };
 
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        document.getElementById('auth-container').classList.add('hidden');
-        document.getElementById('app-container').classList.remove('hidden');
-        document.getElementById('display-user').innerText = user.email;
-        onSnapshot(doc(db, "users", user.uid), (snap) => {
-            if (snap.exists()) availableFields = snap.data().fields || ["Standard-Feld"];
-            updateFieldDropdown();
-            switchField(currentFieldId);
-        });
-    } else {
-        document.getElementById('auth-container').classList.remove('hidden');
-        document.getElementById('app-container').classList.add('hidden');
-    }
-});
-
-function updateFieldDropdown() {
-    const sel = document.getElementById('field-select');
-    sel.innerHTML = availableFields.map(f => `<option value="${f}" ${f === currentFieldId ? 'selected' : ''}>${f}</option>`).join('');
-    sel.onchange = (e) => switchField(e.target.value);
-}
-
-window.switchField = (fid) => {
-    currentFieldId = fid;
-    if (unsub) unsub();
-    unsub = onSnapshot(doc(db, "solves", auth.currentUser.uid, "fields", fid), (snap) => {
-        const d = snap.exists() ? snap.data() : {};
-        measurements = d.measurements || [];
-        depots = d.depots || [];
-        gridLayout = d.gridLayout || Array(400).fill("a");
-        updateLogic();
+    // AUTH
+    document.getElementById('login-btn').addEventListener('click', () => {
+        signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value);
     });
-};
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+    onAuthStateChanged(auth, (user) => {
+        const isAuth = !!user;
+        document.getElementById('auth-container').classList.toggle('hidden', isAuth);
+        document.getElementById('nav-bar').classList.toggle('hidden', !isAuth);
+        document.getElementById('app-container').classList.toggle('hidden', !isAuth);
+        if(isAuth) {
+            document.getElementById('display-user').innerText = user.email;
+            listenToCloud(user.uid);
+        }
+    });
 
-window.createNewField = async () => {
-    const n = prompt("Feldname:");
-    if (n && !availableFields.includes(n)) {
-        availableFields.push(n);
-        await setDoc(doc(db, "users", auth.currentUser.uid), { fields: availableFields });
-        switchField(n);
-    }
-};
+    // PROSPECTING LOGIC
+    window.setMode = (m) => {
+        mode = m;
+        document.getElementById('mode-scan').style.opacity = m === 'scan' ? '1' : '0.5';
+        document.getElementById('mode-depot').style.opacity = m === 'depot' ? '1' : '0.5';
+    };
 
-window.parseBulkLog = async () => {
-    const text = document.getElementById('swc-bulk-log').value;
-    if (text.includes("<deposits")) {
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, "text/xml");
-        const fStr = xml.querySelector("fieldString")?.textContent;
-        if (fStr) gridLayout = fStr.replace(/\s/g, "").split("");
-        const xmlDepots = xml.querySelectorAll("deposit");
-        xmlDepots.forEach(d => {
-            const x = parseInt(d.getAttribute("x")), y = parseInt(d.getAttribute("y"));
-            if (!depots.some(ex => ex.x === x && ex.y === y)) {
-                depots.push({x, y});
+    canvas.addEventListener('click', async (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / (rect.width / gridSize));
+        const y = Math.floor((e.clientY - rect.top) / (rect.height / gridSize));
+        
+        if(mode === 'depot') {
+            const exists = depots.findIndex(d => d.x === x && d.y === y);
+            if(exists > -1) depots.splice(exists, 1);
+            else {
+                const newDepot = {x, y};
+                depots.push(newDepot);
+                // Auto-Cleanup: Lösche Scans, die zu diesem Depot passen
                 measurements = measurements.filter(m => (Math.abs(m.x - x) + Math.abs(m.y - y)) !== m.d);
             }
-        });
-    } else {
-        const lines = text.split('\n');
-        lines.forEach(line => {
-            const coords = line.match(/at\s*\((\d+)\s*,\s*(\d+)\)/i);
-            if (coords) {
-                const x = parseInt(coords[1]), y = parseInt(coords[2]);
-                const dist = line.match(/(\d+)\s*squares?\s*away/i);
-                if (dist) measurements.push({ x, y, d: parseInt(dist[1]) });
+            await sync();
+        } else {
+            // Für manuellen Modus: Alert oder Inputs füllen
+            const d = prompt(`Distanz für Scan bei ${x},${y}:`);
+            if(d !== null) {
+                measurements.push({x, y, d: parseInt(d)});
+                await sync();
             }
+        }
+    });
+
+    window.parseBulkLog = async () => {
+        const lines = document.getElementById('swc-bulk-log').value.split('\n');
+        lines.forEach(line => {
+            const coords = line.match(/(\d+)\s*,\s*(\d+)/);
+            const dist = line.match(/(?:distance|of)\s*(\d+)/i);
+            if(coords && dist) measurements.push({x: parseInt(coords[1]), y: parseInt(coords[2]), d: parseInt(dist[1])});
+            else if(coords && line.includes('located')) depots.push({x: parseInt(coords[1]), y: parseInt(coords[2])});
+        });
+        await sync();
+        document.getElementById('swc-bulk-log').value = "";
+    };
+
+    async function sync() {
+        if(!auth.currentUser) return;
+        await setDoc(doc(db, "solves", auth.currentUser.uid), { measurements, depots, buildQueue });
+    }
+
+    function listenToCloud(uid) {
+        onSnapshot(doc(db, "solves", uid), (snap) => {
+            if(!snap.exists()) return;
+            const data = snap.data();
+            measurements = data.measurements || [];
+            depots = data.depots || [];
+            buildQueue = data.buildQueue || [];
+            render();
+            updateQueueUI();
         });
     }
-    await sync();
-    document.getElementById('swc-bulk-log').value = "";
-};
 
-async function sync() { await setDoc(doc(db, "solves", auth.currentUser.uid, "fields", currentFieldId), { measurements, depots, gridLayout }); }
-
-window.setMode = (m) => {
-    mode = m;
-    document.getElementById('mode-scan').className = m === 'scan' ? 'btn-primary active-mode' : 'btn-primary';
-    document.getElementById('mode-depot').className = m === 'depot' ? 'btn-depot active-mode' : 'btn-depot';
-};
-
-canvas.addEventListener('click', async (e) => {
-    const r = canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - r.left) / (r.width / gridSize));
-    const y = Math.floor((e.clientY - r.top) / (r.height / gridSize));
-    if (mode === 'depot') {
-        const idx = depots.findIndex(d => d.x === x && d.y === y);
-        if (idx > -1) depots.splice(idx, 1);
-        else {
-            depots.push({x, y});
-            measurements = measurements.filter(m => (Math.abs(m.x - x) + Math.abs(m.y - y)) !== m.d);
+    function render() {
+        let possible = [];
+        for(let x=0; x<gridSize; x++) {
+            for(let y=0; y<gridSize; y++) {
+                if(measurements.every(m => (Math.abs(x-m.x) + Math.abs(y-m.y)) === m.d)) possible.push({x, y});
+            }
         }
+
+        ctx.clearRect(0,0,600,600);
+        ctx.strokeStyle = "#333";
+        for(let i=0; i<=gridSize; i++) {
+            ctx.beginPath(); ctx.moveTo(i*30,0); ctx.lineTo(i*30,600); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0,i*30); ctx.lineTo(600,i*30); ctx.stroke();
+        }
+
+        ctx.fillStyle = "rgba(0, 123, 255, 0.3)";
+        possible.forEach(c => ctx.fillRect(c.x*30+1, c.y*30+1, 28, 28));
+        
+        depots.forEach(d => {
+            ctx.fillStyle = "#28a745"; ctx.beginPath();
+            ctx.arc(d.x*30+15, d.y*30+15, 10, 0, 7); ctx.fill();
+        });
+
+        measurements.forEach(m => {
+            ctx.fillStyle = "#ffc107"; ctx.beginPath();
+            ctx.arc(m.x*30+15, m.y*30+15, 5, 0, 7); ctx.fill();
+        });
+
+        // Visuelle Empfehlung (Fadenkreuz)
+        const rec = getRecommendation(possible);
+        if(rec) {
+            ctx.strokeStyle = "#00d4ff"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(rec.x*30+15, rec.y*30+15, 12, 0, 7); ctx.stroke();
+        }
+
+        document.getElementById('info').innerHTML = `Möglichkeiten: ${possible.length} | ${rec ? 'Empfehlung: '+rec.x+','+rec.y : 'Scan nötig'}`;
+    }
+
+    function getRecommendation(possible) {
+        if(possible.length <= 1 || possible.length > 100) return null;
+        let best = null, minMax = Infinity;
+        for(let x=0; x<gridSize; x++) {
+            for(let y=0; y<gridSize; y++) {
+                let counts = {};
+                possible.forEach(c => {
+                    let d = Math.abs(x-c.x) + Math.abs(y-c.y);
+                    counts[d] = (counts[d]||0)+1;
+                });
+                let worst = Math.max(...Object.values(counts));
+                if(worst < minMax) { minMax = worst; best = {x,y}; }
+            }
+        }
+        return best;
+    }
+
+    // LOGISTICS LOGIC
+    window.addStationToQueue = async () => {
+        const val = document.getElementById('station-template').value.split('|');
+        buildQueue.push({ name: val[0], volume: parseInt(val[1]) });
         await sync();
-    } else {
-        document.getElementById('x').value = x; document.getElementById('y').value = y;
-        document.getElementById('d').focus();
-    }
-});
+    };
 
-window.manualAdd = async () => {
-    const x = parseInt(document.getElementById('x').value), y = parseInt(document.getElementById('y').value), d = parseInt(document.getElementById('d').value);
-    if(!isNaN(x) && !isNaN(y) && !isNaN(d)) { measurements.push({x, y, d}); await sync(); }
-};
+    window.optimizeBuildOrder = () => {
+        const cap = parseInt(document.getElementById('ship-cap').value);
+        let sorted = [...buildQueue].sort((a,b) => a.volume - b.volume);
+        let html = "<b>Baureihenfolge (Effizient):</b><br>";
+        sorted.forEach((s, i) => {
+            html += `${i+1}. ${s.name} (${Math.ceil(s.volume/cap)} Flüge)<br>`;
+        });
+        document.getElementById('build-strategy').innerHTML = html;
+    };
 
-function updateLogic() {
-    possibleCells = [];
-    for(let x=0; x<gridSize; x++) {
-        for(let y=0; y<gridSize; y++) {
-            const isA = gridLayout[y * gridSize + x] === "a";
-            if (isA && measurements.every(m => (Math.abs(x-m.x) + Math.abs(y-m.y)) === m.d)) possibleCells.push({x, y});
-        }
+    function updateQueueUI() {
+        document.getElementById('station-list').innerHTML = buildQueue.map(s => `<li>🏗️ ${s.name}</li>`).join('');
     }
-    draw();
-}
 
-function draw() {
-    ctx.clearRect(0,0,600,600);
-    for (let i = 0; i < 400; i++) {
-        if (gridLayout[i] === "a") {
-            ctx.fillStyle = "#222";
-            ctx.fillRect((i % 20) * 30, Math.floor(i / 20) * 30, 30, 30);
-        }
-    }
-    ctx.strokeStyle = "#1a1a1a";
-    for(let i=0; i<=gridSize; i++) {
-        ctx.beginPath(); ctx.moveTo(i*30,0); ctx.lineTo(i*30,600); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0,i*30); ctx.lineTo(600,i*30); ctx.stroke();
-    }
-    ctx.fillStyle = "rgba(255, 0, 0, 0.4)";
-    possibleCells.forEach(c => ctx.fillRect(c.x*30+1, c.y*30+1, 28, 28));
-    depots.forEach(d => {
-        ctx.fillStyle = "#28a745"; ctx.beginPath(); ctx.arc(d.x*30+15, d.y*30+15, 10, 0, 7); ctx.fill();
-        ctx.strokeStyle="white"; ctx.lineWidth=1; ctx.stroke();
-    });
-    measurements.forEach(m => {
-        ctx.fillStyle = "#ffc107"; ctx.beginPath(); ctx.arc(m.x*30+15, m.y*30+15, 5, 0, 7); ctx.fill();
-    });
-    const rec = getRec();
-    if(rec) {
-        ctx.strokeStyle = "#00d4ff"; ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.arc(rec.x*30+15, rec.y*30+15, 12, 0, 7); ctx.stroke();
-        document.getElementById('info').innerHTML = `Möglichkeiten: <b>${possibleCells.length}</b><br>Empfehlung: <b>(${rec.x}, ${rec.y})</b>`;
-    } else {
-        document.getElementById('info').innerHTML = `Möglichkeiten: <b>${possibleCells.length}</b>`;
-    }
-}
-
-function getRec() {
-    if (possibleCells.length <= 1 || possibleCells.length > 150) return null;
-    let best = null, minMax = Infinity;
-    for(let x=0; x<gridSize; x++) {
-        for(let y=0; y<gridSize; y++) {
-            if (gridLayout[y * gridSize + x] !== "a" || measurements.some(m => m.x === x && m.y === y)) continue;
-            let parts = {};
-            possibleCells.forEach(c => { let d = Math.abs(x-c.x)+Math.abs(y-c.y); parts[d] = (parts[d]||0)+1; });
-            let worst = Math.max(...Object.values(parts));
-            if(worst < minMax) { minMax = worst; best = {x,y}; }
-        }
-    }
-    return best;
-}
-
-window.resetCurrentField = async () => { if(confirm("Daten löschen?")) await deleteDoc(doc(db, "solves", auth.currentUser.uid, "fields", currentFieldId)); };
+    window.resetCloud = async () => { if(confirm("Reset?")) await deleteDoc(doc(db, "solves", auth.currentUser.uid)); };
 </script>
 </body>
 </html>
+
+
